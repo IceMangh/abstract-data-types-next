@@ -1,19 +1,18 @@
 #pragma once
-#include <memory>
+
 #include "IEnumerable.h"
 #include "ICollection.h"
 
 template <class T>
 class Sequence : public IEnumerable<T>, public ICollection<T> {
 protected:
-    void AppendToResult(std::unique_ptr<Sequence<T>>& result, const T& item) const {
-        Sequence<T>* current = result.get();
-        Sequence<T>* updated = current->Append(item);
+    void AppendToResult(Sequence<T>*& result, const T& Item) const {
+        Sequence<T>* current = result;
+        Sequence<T>* updated = current->Append(Item);
 
         if (updated != current) {
-            result.release();
             delete current;
-            result.reset(updated);
+            result = updated;
         }
     }
 
@@ -30,9 +29,9 @@ public:
     }
 
     virtual Sequence<T>* GetSubsequence(int startIndex, int endIndex) const = 0;
-    virtual Sequence<T>* Append(const T& item) = 0;
-    virtual Sequence<T>* Prepend(const T& item) = 0;
-    virtual Sequence<T>* InsertAt(const T& item, int index) = 0;
+    virtual Sequence<T>* Append(const T& Item) = 0;
+    virtual Sequence<T>* Prepend(const T& Item) = 0;
+    virtual Sequence<T>* InsertAt(const T& Item, int index) = 0;
     virtual Sequence<T>* Concat(const Sequence<T>& other) const = 0;
 
     virtual Sequence<T>* Clone() const override = 0;
@@ -40,26 +39,37 @@ public:
 
     template <class Mapper>
     Sequence<T>* Map(Mapper mapper) const {
-        std::unique_ptr<Sequence<T>> result(CreateEmpty());
-        std::unique_ptr<IEnumerator<T>> enumerator(this->GetEnumerator());
+        Sequence<T>* result = CreateEmpty();
+        IEnumerator<T>* enumerator = this->GetEnumerator();
 
-        while (enumerator->MoveNext()) {
-            AppendToResult(result, mapper(enumerator->Current()));
+        try {
+            while (enumerator->MoveNext()) {
+                AppendToResult(result, mapper(enumerator->Current()));
+            }
+            delete enumerator;
+            return result;
+        } catch (...) {
+            delete enumerator;
+            delete result;
+            throw;
         }
-
-        return result.release();
     }
 
     template <class Reducer>
     T Reduce(Reducer reducer, T start) const {
         T result = start;
-        std::unique_ptr<IEnumerator<T>> enumerator(this->GetEnumerator());
+        IEnumerator<T>* enumerator = this->GetEnumerator();
 
-        while (enumerator->MoveNext()) {
-            result = reducer(result, enumerator->Current());
+        try {
+            while (enumerator->MoveNext()) {
+                result = reducer(result, enumerator->Current());
+            }
+            delete enumerator;
+            return result;
+        } catch (...) {
+            delete enumerator;
+            throw;
         }
-
-        return result;
     }
 
     bool operator==(const Sequence<T>& other) const {

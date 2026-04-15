@@ -1,69 +1,62 @@
 #pragma once
 
-#include "LinkedList.h"
+#include "MutableListSequence.h"
 #include "Exceptions.h"
 
 template <class T>
 class Deque {
 private:
-    LinkedList<T> data_;
+    MutableListSequence<T> Items_;
 
 public:
-    Deque() : data_() {}
+    Deque() : Items_() {}
 
-    Deque(const T* items, int count) : data_(items, count) {}
+    Deque(const T* Items, int Count) : Items_(Items, Count) {}
 
-    Deque(const Deque<T>& other) : data_(other.data_) {}
-
-    Deque<T>& operator=(const Deque<T>& other) {
-        if (this != &other) {
-            data_ = other.data_;
-        }
-        return *this;
-    }
+    Deque(const Deque<T>& Other) = default;
 
     ~Deque() = default;
 
     void Clear() {
-        data_.Clear();
+        Items_.Clear();
     }
 
     int GetSize() const {
-        return data_.GetLength();
+        return Items_.GetLength();
     }
 
     bool IsEmpty() const {
-        return data_.IsEmpty();
+        return Items_.IsEmpty();
     }
 
     const T& Front() const {
         if (IsEmpty()) {
             throw EmptyStructure("Deque is empty");
         }
-        return data_.GetFirst();
+        return Items_.GetFirst();
     }
 
     const T& Back() const {
         if (IsEmpty()) {
             throw EmptyStructure("Deque is empty");
         }
-        return data_.GetLast();
+        return Items_.GetLast();
     }
 
     const T& Get(int index) const {
-        return data_.Get(index);
+        return Items_.Get(index);
     }
 
     void Set(int index, const T& value) {
-        data_.Set(index, value);
+        Items_.Set(index, value);
     }
 
-    void PushFront(const T& item) {
-        data_.Prepend(item);
+    void PushFront(const T& Item) {
+        Items_.Prepend(Item);
     }
 
-    void PushBack(const T& item) {
-        data_.Append(item);
+    void PushBack(const T& Item) {
+        Items_.Append(Item);
     }
 
     T PopFront() {
@@ -71,7 +64,7 @@ public:
             throw EmptyStructure("Deque is empty");
         }
 
-        return data_.RemoveFirst();
+        return Items_.RemoveFirst();
     }
 
     T PopBack() {
@@ -79,56 +72,56 @@ public:
             throw EmptyStructure("Deque is empty");
         }
 
-        return data_.RemoveLast();
+        return Items_.RemoveLast();
     }
 
-    Deque<T> Concat(const Deque<T>& other) const {
-        Deque<T> result(*this);
-        for (int i = 0; i < other.GetSize(); ++i) {
-            result.PushBack(other.Get(i));
+    Deque<T> Concat(const Deque<T>& Other) const {
+        Deque<T> Result(*this);
+        for (int i = 0; i < Other.GetSize(); ++i) {
+            Result.PushBack(Other.Get(i));
         }
-        return result;
+        return Result;
     }
 
-    Deque<T> GetSubsequence(int startIndex, int endIndex) const {
+    Deque<T>* GetSubsequence(int startIndex, int endIndex) const {
         if (startIndex < 0 || endIndex < 0 || startIndex >= GetSize() || endIndex >= GetSize() || startIndex > endIndex) {
             throw IndexOutOfRange();
         }
 
-        Deque<T> result;
+        Deque<T>* Result = new Deque<T>();
         for (int i = startIndex; i <= endIndex; ++i) {
-            result.PushBack(Get(i));
+            Result->PushBack(Get(i));
         }
-        return result;
+        return Result;
     }
 
     template <class Mapper>
     Deque<T> Map(Mapper mapper) const {
-        Deque<T> result;
+        Deque<T> Result;
         for (int i = 0; i < GetSize(); ++i) {
-            result.PushBack(mapper(Get(i)));
+            Result.PushBack(mapper(Get(i)));
         }
-        return result;
+        return Result;
     }
 
     template <class Predicate>
     Deque<T> Where(Predicate predicate) const {
-        Deque<T> result;
+        Deque<T> Result;
         for (int i = 0; i < GetSize(); ++i) {
             if (predicate(Get(i))) {
-                result.PushBack(Get(i));
+                Result.PushBack(Get(i));
             }
         }
-        return result;
+        return Result;
     }
 
     template <class Reducer>
     T Reduce(Reducer reducer, T start) const {
-        T result = start;
+        T Result = start;
         for (int i = 0; i < GetSize(); ++i) {
-            result = reducer(result, Get(i));
+            Result = reducer(Result, Get(i));
         }
-        return result;
+        return Result;
     }
 
     template <class Comparator>
@@ -158,20 +151,22 @@ public:
         });
     }
 
-    bool operator==(const Deque<T>& other) const {
-        if (GetSize() != other.GetSize()) {
+    bool operator==(const Deque<T>& Other) const {
+        if (GetSize() != Other.GetSize()) {
             return false;
         }
 
         for (int i = 0; i < GetSize(); ++i) {
-            if (Get(i) != other.Get(i)) {
+            if (Get(i) != Other.Get(i)) {
                 return false;
             }
         }
         return true;
     }
 
-    bool operator!=(const Deque<T>& other) const {
-        return !(*this == other);
+    Deque<T>& operator=(const Deque<T>& Other) = default;
+
+    bool operator!=(const Deque<T>& Other) const {
+        return !(*this == Other);
     }
 };

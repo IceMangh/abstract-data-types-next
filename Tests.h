@@ -7,7 +7,8 @@
 #include "LinkedList.h"
 #include "MutableArraySequence.h"
 #include "ImmutableArraySequence.h"
-#include "ListSequence.h"
+#include "MutableListSequence.h"
+#include "ImmutableListSequence.h"
 #include "Stack.h"
 #include "Deque.h"
 #include "PriorityQueue.h"
@@ -54,15 +55,15 @@ inline void TestDynamicArrayExceptions() {
 
 inline void TestLinkedList() {
     int data[] = {1, 2, 3};
-    LinkedList<int> list(data, 3);
-    assert(list.GetFirst() == 1);
-    assert(list.GetLast() == 3);
-    list.Append(4);
-    list.Prepend(0);
-    list.InsertAt(99, 2);
-    assert(list.GetFirst() == 0);
-    assert(list.Get(2) == 99);
-    assert(list.GetLast() == 4);
+    LinkedList<int> List(data, 3);
+    assert(List.GetFirst() == 1);
+    assert(List.GetLast() == 3);
+    List.Append(4);
+    List.Prepend(0);
+    List.InsertAt(99, 2);
+    assert(List.GetFirst() == 0);
+    assert(List.Get(2) == 99);
+    assert(List.GetLast() == 4);
 }
 
 inline void TestArraySequence() {
@@ -73,10 +74,10 @@ inline void TestArraySequence() {
     assert(seq.Get(2) == 99);
     assert(seq.GetLast() == 4);
 
-    Sequence<int>* sub = seq.GetSubsequence(1, 3);
-    assert(sub->GetLength() == 3);
-    assert(sub->Get(0) == 1);
-    delete sub;
+    Sequence<int>* Sub = seq.GetSubsequence(1, 3);
+    assert(Sub->GetLength() == 3);
+    assert(Sub->Get(0) == 1);
+    delete Sub;
 }
 
 inline void TestArraySequenceMap() {
@@ -112,23 +113,23 @@ inline void TestArraySequenceReduce() {
     assert(mulResult == 24);
 }
 
-inline void TestListSequence() {
+inline void TestMutableListSequence() {
     int data[] = {1, 2, 3};
-    ListSequence<int> seq(data, 3);
+    MutableListSequence<int> seq(data, 3);
     seq.Append(4)->Prepend(0)->InsertAt(99, 2);
     assert(seq.GetFirst() == 0);
     assert(seq.Get(2) == 99);
     assert(seq.GetLast() == 4);
 
-    Sequence<int>* sub = seq.GetSubsequence(1, 3);
-    assert(sub->GetLength() == 3);
-    assert(sub->Get(0) == 1);
-    delete sub;
+    Sequence<int>* Sub = seq.GetSubsequence(1, 3);
+    assert(Sub->GetLength() == 3);
+    assert(Sub->Get(0) == 1);
+    delete Sub;
 }
 
-inline void TestListSequenceMap() {
+inline void TestMutableListSequenceMap() {
     int data[] = {1, 2, 3};
-    ListSequence<int> seq(data, 3);
+    MutableListSequence<int> seq(data, 3);
     Sequence<int>* mapped = seq.Map(Double);
 
     assert(mapped->GetLength() == 3);
@@ -139,9 +140,9 @@ inline void TestListSequenceMap() {
     delete mapped;
 }
 
-inline void TestListSequenceFrom() {
+inline void TestMutableListSequenceFrom() {
     int data[] = {1, 2, 3};
-    ListSequence<int> seq = ListSequence<int>::From(data, 3);
+    MutableListSequence<int> seq = MutableListSequence<int>::From(data, 3);
 
     assert(seq.GetLength() == 3);
     assert(seq.Get(0) == 1);
@@ -149,9 +150,9 @@ inline void TestListSequenceFrom() {
     assert(seq.Get(2) == 3);
 }
 
-inline void TestListSequenceReduce() {
+inline void TestMutableListSequenceReduce() {
     int data[] = {1, 2, 3, 4};
-    ListSequence<int> seq(data, 4);
+    MutableListSequence<int> seq(data, 4);
 
     int sumResult = seq.Reduce(Sum, 0);
     int mulResult = seq.Reduce(Multiply, 1);
@@ -160,12 +161,87 @@ inline void TestListSequenceReduce() {
     assert(mulResult == 24);
 }
 
+inline void TestImmutableListSequence() {
+    int data[] = {1, 2, 3};
+    ImmutableListSequence<int> original(data, 3);
+
+    Sequence<int>* appended = original.Append(4);
+    Sequence<int>* prepended = original.Prepend(0);
+    Sequence<int>* inserted = original.InsertAt(99, 1);
+
+    assert(original.GetLength() == 3);
+    assert(original.Get(0) == 1);
+    assert(original.Get(1) == 2);
+    assert(original.Get(2) == 3);
+
+    assert(appended->GetLength() == 4);
+    assert(appended->GetLast() == 4);
+
+    assert(prepended->GetLength() == 4);
+    assert(prepended->GetFirst() == 0);
+
+    assert(inserted->GetLength() == 4);
+    assert(inserted->Get(1) == 99);
+    assert(inserted->Get(2) == 2);
+
+    delete appended;
+    delete prepended;
+    delete inserted;
+}
+
+inline void TestImmutableListSequenceMapReduce() {
+    int data[] = {1, 2, 3, 4};
+    ImmutableListSequence<int> seq(data, 4);
+
+    Sequence<int>* mapped = seq.Map(Double);
+    Sequence<int>* Sub = seq.GetSubsequence(1, 2);
+    Sequence<int>* joined = seq + *Sub;
+
+    assert(mapped->GetLength() == 4);
+    assert(mapped->Get(0) == 2);
+    assert(mapped->Get(3) == 8);
+
+    assert(Sub->GetLength() == 2);
+    assert(Sub->Get(0) == 2);
+    assert(Sub->Get(1) == 3);
+
+    assert(joined->GetLength() == 6);
+    assert(joined->Get(4) == 2);
+    assert(joined->Get(5) == 3);
+
+    assert(seq.Reduce(Sum, 0) == 10);
+    assert(seq.Reduce(Multiply, 1) == 24);
+
+    delete mapped;
+    delete Sub;
+    delete joined;
+}
+
+inline void TestMutableVsImmutableListDifference() {
+    int data[] = {1, 2, 3};
+    MutableListSequence<int> mutableSeq(data, 3);
+    ImmutableListSequence<int> immutableSeq(data, 3);
+
+    mutableSeq.Append(10);
+    Sequence<int>* immutableResult = immutableSeq.Append(10);
+
+    assert(mutableSeq.GetLength() == 4);
+    assert(mutableSeq.GetLast() == 10);
+
+    assert(immutableSeq.GetLength() == 3);
+    assert(immutableSeq.GetLast() == 3);
+    assert(immutableResult->GetLength() == 4);
+    assert(immutableResult->GetLast() == 10);
+
+    delete immutableResult;
+}
+
 inline void TestConcat() {
     int a[] = {1, 2};
     int b[] = {3, 4};
 
     MutableArraySequence<int> seq1(a, 2);
-    ListSequence<int> seq2(b, 2);
+    ImmutableListSequence<int> seq2(b, 2);
 
     Sequence<int>* joined = seq1 + seq2;
     assert(joined->GetLength() == 4);
@@ -224,16 +300,16 @@ inline void TestImmutableArraySequenceMapReduce() {
     ImmutableArraySequence<int> seq(data, 4);
 
     Sequence<int>* mapped = seq.Map(Double);
-    Sequence<int>* sub = seq.GetSubsequence(1, 2);
-    Sequence<int>* joined = seq + *sub;
+    Sequence<int>* Sub = seq.GetSubsequence(1, 2);
+    Sequence<int>* joined = seq + *Sub;
 
     assert(mapped->GetLength() == 4);
     assert(mapped->Get(0) == 2);
     assert(mapped->Get(3) == 8);
 
-    assert(sub->GetLength() == 2);
-    assert(sub->Get(0) == 2);
-    assert(sub->Get(1) == 3);
+    assert(Sub->GetLength() == 2);
+    assert(Sub->Get(0) == 2);
+    assert(Sub->Get(1) == 3);
 
     assert(joined->GetLength() == 6);
     assert(joined->Get(4) == 2);
@@ -243,7 +319,7 @@ inline void TestImmutableArraySequenceMapReduce() {
     assert(seq.Reduce(Multiply, 1) == 24);
 
     delete mapped;
-    delete sub;
+    delete Sub;
     delete joined;
 }
 
@@ -285,17 +361,19 @@ inline void TestStackAlgorithms() {
 
     Stack<int> mapped = stack.Map(Double);
     Stack<int> filtered = stack.Where(IsEven);
-    Stack<int> sub = stack.GetSubsequence(1, 2);
+    Stack<int>* Sub = stack.GetSubsequence(1, 2);
 
     assert(mapped.Get(0) == 2);
     assert(mapped.Get(3) == 8);
     assert(filtered.GetSize() == 2);
     assert(filtered.Get(0) == 2);
     assert(filtered.Get(1) == 4);
-    assert(sub.GetSize() == 2);
-    assert(sub.Get(0) == 2);
-    assert(sub.Get(1) == 3);
+    assert(Sub->GetSize() == 2);
+    assert(Sub->Get(0) == 2);
+    assert(Sub->Get(1) == 3);
     assert(stack.Reduce(Sum, 0) == 10);
+
+    delete Sub;
 }
 
 inline void TestStackConcatAndSearch() {
@@ -352,7 +430,7 @@ inline void TestDequeAlgorithms() {
 
     Deque<int> mapped = deque.Map(Double);
     Deque<int> filtered = deque.Where(IsEven);
-    Deque<int> sub = deque.GetSubsequence(1, 3);
+    Deque<int>* Sub = deque.GetSubsequence(1, 3);
     Deque<int> concat = deque.Concat(filtered);
 
     assert(mapped.Get(0) == 10);
@@ -360,11 +438,13 @@ inline void TestDequeAlgorithms() {
     assert(filtered.GetSize() == 2);
     assert(filtered.Get(0) == 4);
     assert(filtered.Get(1) == 2);
-    assert(sub.GetSize() == 3);
-    assert(sub.Get(0) == 1);
-    assert(sub.Get(2) == 2);
+    assert(Sub->GetSize() == 3);
+    assert(Sub->Get(0) == 1);
+    assert(Sub->Get(2) == 2);
     assert(concat.GetSize() == 7);
     assert(deque.Reduce(Sum, 0) == 15);
+
+    delete Sub;
 }
 
 inline void TestDequeSort() {
@@ -414,18 +494,21 @@ inline void RunAllTests() {
     TestDynamicArrayExceptions();
     TestLinkedList();
     TestArraySequence();
-    TestListSequence();
+    TestMutableListSequence();
     TestArraySequenceFrom();
     TestArraySequenceMap();
     TestArraySequenceReduce();
-    TestListSequenceFrom();
-    TestListSequenceMap();
-    TestListSequenceReduce();
+    TestMutableListSequenceFrom();
+    TestMutableListSequenceMap();
+    TestMutableListSequenceReduce();
     TestConcat();
     TestClone();
     TestImmutableArraySequence();
     TestImmutableArraySequenceMapReduce();
     TestMutableVsImmutableDifference();
+    TestImmutableListSequence();
+    TestImmutableListSequenceMapReduce();
+    TestMutableVsImmutableListDifference();
     TestStackBasic();
     TestStackAlgorithms();
     TestStackConcatAndSearch();

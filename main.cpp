@@ -5,7 +5,8 @@
 
 #include "MutableArraySequence.h"
 #include "ImmutableArraySequence.h"
-#include "ListSequence.h"
+#include "MutableListSequence.h"
+#include "ImmutableListSequence.h"
 #include "Stack.h"
 #include "Deque.h"
 #include "Hanoi.h"
@@ -115,9 +116,9 @@ void ShowAlgorithms(const Sequence<int>& seq) {
     std::cout << "Reduce(sum): " << seq.Reduce(Sum, 0) << '\n';
 
     if (seq.GetLength() >= 2) {
-        Sequence<int>* sub = seq.GetSubsequence(0, seq.GetLength() - 2);
-        PrintSequence(*sub, "Subsequence(0, n-2)");
-        delete sub;
+        Sequence<int>* Sub = seq.GetSubsequence(0, seq.GetLength() - 2);
+        PrintSequence(*Sub, "Subsequence(0, n-2)");
+        delete Sub;
     }
 }
 
@@ -176,7 +177,7 @@ void DemoImmutableArraySequence() {
 
 void DemoMutableListSequence() {
     std::cout << "\n=== Mutable ListSequence ===\n";
-    ListSequence<int> sequence = BuildSequence<ListSequence<int>>(ReadElements());
+    MutableListSequence<int> sequence = BuildSequence<MutableListSequence<int>>(ReadElements());
     PrintSequence(sequence, "Исходная последовательность");
 
     const int appendValue = ReadInt("Значение для Append: ");
@@ -194,7 +195,37 @@ void DemoMutableListSequence() {
 
     PrintCommonInfo(sequence);
     ShowAlgorithms(sequence);
-    std::cout << "Вывод: ListSequence в этом проекте реализована как mutable-структура.\n";
+    std::cout << "Вывод: mutable-версия меняет исходный объект.\n";
+}
+
+void DemoImmutableListSequence() {
+    std::cout << "\n=== Immutable ListSequence ===\n";
+    ImmutableListSequence<int> original = BuildSequence<ImmutableListSequence<int>>(ReadElements());
+    PrintSequence(original, "Исходная последовательность");
+
+    const int appendValue = ReadInt("Значение для Append: ");
+    Sequence<int>* appended = original.Append(appendValue);
+    PrintSequence(original, "Исходный объект после Append");
+    PrintSequence(*appended, "Новый объект после Append");
+
+    const int prependValue = ReadInt("Значение для Prepend: ");
+    Sequence<int>* prepended = appended->Prepend(prependValue);
+    PrintSequence(*appended, "Предыдущий объект после Prepend");
+    PrintSequence(*prepended, "Новый объект после Prepend");
+
+    const int insertValue = ReadInt("Значение для InsertAt: ");
+    const int insertIndex = ReadInt("Индекс для InsertAt (0.." + std::to_string(prepended->GetLength()) + "): ");
+    Sequence<int>* inserted = prepended->InsertAt(insertValue, insertIndex);
+    PrintSequence(*prepended, "Предыдущий объект после InsertAt");
+    PrintSequence(*inserted, "Новый объект после InsertAt");
+
+    PrintCommonInfo(*inserted);
+    ShowAlgorithms(*inserted);
+    std::cout << "Вывод: immutable-версия не меняет исходный объект, а возвращает новую последовательность.\n";
+
+    delete appended;
+    delete prepended;
+    delete inserted;
 }
 
 void DemoStack() {
@@ -221,8 +252,9 @@ void DemoStack() {
     if (stack.GetSize() >= 2) {
         const int start = ReadInt("Начальный индекс подпоследовательности: ");
         const int end = ReadInt("Конечный индекс подпоследовательности: ");
-        Stack<int> sub = stack.GetSubsequence(start, end);
-        PrintStack(sub, "Извлеченная подпоследовательность");
+        Stack<int>* Sub = stack.GetSubsequence(start, end);
+        PrintStack(*Sub, "Извлеченная подпоследовательность");
+        delete Sub;
     }
 
     std::cout << "--- Конкатенация и поиск подпоследовательности ---\n";
@@ -262,8 +294,9 @@ void DemoDeque() {
     if (deque.GetSize() >= 2) {
         const int start = ReadInt("Начальный индекс извлечения: ");
         const int end = ReadInt("Конечный индекс извлечения: ");
-        Deque<int> sub = deque.GetSubsequence(start, end);
-        PrintDeque(sub, "Извлеченная часть дека");
+        Deque<int>* Sub = deque.GetSubsequence(start, end);
+        PrintDeque(*Sub, "Извлеченная часть дека");
+        delete Sub;
     }
 
     Deque<int> second = BuildSequence<Deque<int>>(ReadElements("второго дека"));
@@ -278,12 +311,12 @@ void DemoPriorityQueue() {
     std::cout << "\n=== PriorityQueue ===\n";
 
     PriorityQueue<int> queue;
-    const int count = ReadInt("Введите количество элементов: ");
-    if (count < 0) {
+    const int Count = ReadInt("Введите количество элементов: ");
+    if (Count < 0) {
         throw std::invalid_argument("Количество элементов не может быть отрицательным");
     }
 
-    for (int i = 0; i < count; ++i) {
+    for (int i = 0; i < Count; ++i) {
         const int value = ReadInt("Введите значение: ");
         const int priority = ReadInt("Введите приоритет: ");
         queue.Push(value, priority);
@@ -318,10 +351,11 @@ void PrintMenu() {
     std::cout << "2. Демонстрация mutable ArraySequence\n";
     std::cout << "3. Демонстрация immutable ArraySequence\n";
     std::cout << "4. Демонстрация mutable ListSequence\n";
-    std::cout << "5. Демонстрация Stack\n";
-    std::cout << "6. Демонстрация Deque\n";
-    std::cout << "7. Демонстрация PriorityQueue\n";
-    std::cout << "8. Демонстрация Ханойской башни\n";
+    std::cout << "5. Демонстрация immutable ListSequence\n";
+    std::cout << "6. Демонстрация Stack\n";
+    std::cout << "7. Демонстрация Deque\n";
+    std::cout << "8. Демонстрация PriorityQueue\n";
+    std::cout << "9. Демонстрация Ханойской башни\n";
     std::cout << "0. Выход\n";
 }
 
@@ -347,15 +381,18 @@ int main() {
                     DemoMutableListSequence();
                     break;
                 case 5:
-                    DemoStack();
+                    DemoImmutableListSequence();
                     break;
                 case 6:
-                    DemoDeque();
+                    DemoStack();
                     break;
                 case 7:
-                    DemoPriorityQueue();
+                    DemoDeque();
                     break;
                 case 8:
+                    DemoPriorityQueue();
+                    break;
+                case 9:
                     DemoHanoi();
                     break;
                 case 0:
