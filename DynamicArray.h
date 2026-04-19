@@ -26,39 +26,39 @@ public:
         }
     }
 
-    DynamicArray(const T* items, int count) : data_(nullptr), size_(count) {
-        if (count < 0) {
+    DynamicArray(const T* Items, int Count) : data_(nullptr), size_(Count) {
+        if (Count < 0) {
             throw std::invalid_argument("Negative size");
         }
         if (size_ > 0) {
             data_ = new T[size_];
             for (int i = 0; i < size_; ++i) {
-                data_[i] = items[i];
+                data_[i] = Items[i];
             }
         }
     }
 
-    DynamicArray(const DynamicArray<T>& other) : data_(nullptr), size_(other.size_) {
+    DynamicArray(const DynamicArray<T>& Other) : data_(nullptr), size_(Other.size_) {
         if (size_ > 0) {
             data_ = new T[size_];
             for (int i = 0; i < size_; ++i) {
-                data_[i] = other.data_[i];
+                data_[i] = Other.data_[i];
             }
         }
     }
 
-    DynamicArray<T>& operator=(const DynamicArray<T>& other) {
-        if (this != &other) {
-            T* newData = nullptr;
-            if (other.size_ > 0) {
-                newData = new T[other.size_];
-                for (int i = 0; i < other.size_; ++i) {
-                    newData[i] = other.data_[i];
+    DynamicArray<T>& operator=(const DynamicArray<T>& Other) {
+        if (this != &Other) {
+            T* NewData = nullptr;
+            if (Other.size_ > 0) {
+                NewData = new T[Other.size_];
+                for (int i = 0; i < Other.size_; ++i) {
+                    NewData[i] = Other.data_[i];
                 }
             }
             delete[] data_;
-            data_ = newData;
-            size_ = other.size_;
+            data_ = NewData;
+            size_ = Other.size_;
         }
         return *this;
     }
@@ -87,17 +87,17 @@ public:
             throw std::invalid_argument("Negative size");
         }
 
-        T* newData = nullptr;
+        T* NewData = nullptr;
         if (newSize > 0) {
-            newData = new T[newSize]{};
+            NewData = new T[newSize]{};
             int copySize = (newSize < size_) ? newSize : size_;
             for (int i = 0; i < copySize; ++i) {
-                newData[i] = data_[i];
+                NewData[i] = data_[i];
             }
         }
 
         delete[] data_;
-        data_ = newData;
+        data_ = NewData;
         size_ = newSize;
     }
 

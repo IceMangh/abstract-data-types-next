@@ -12,11 +12,11 @@ protected:
 public:
     ImmutableArraySequence() : ArraySequenceBase<T>() {}
 
-    ImmutableArraySequence(const T* items, int count) : ArraySequenceBase<T>(items, count) {}
+    ImmutableArraySequence(const T* Items, int Count) : ArraySequenceBase<T>(Items, Count) {}
 
     ImmutableArraySequence(const DynamicArray<T>& dynamicArray) : ArraySequenceBase<T>(dynamicArray) {}
 
-    ImmutableArraySequence(const ImmutableArraySequence<T>& other) : ArraySequenceBase<T>(other) {}
+    ImmutableArraySequence(const ImmutableArraySequence<T>& Other) : ArraySequenceBase<T>(Other) {}
 
     Sequence<T>* Clone() const override {
         return new ImmutableArraySequence<T>(*this);
@@ -26,7 +26,7 @@ public:
         return new ImmutableArraySequence<T>();
     }
 
-    static ImmutableArraySequence<T> From(const T* items, int count) {
-        return ImmutableArraySequence<T>(items, count);
+    static ImmutableArraySequence<T> From(const T* Items, int Count) {
+        return ImmutableArraySequence<T>(Items, Count);
     }
 };
