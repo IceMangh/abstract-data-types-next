@@ -116,9 +116,9 @@ void ShowAlgorithms(const Sequence<int>& seq) {
     std::cout << "Reduce(sum): " << seq.Reduce(Sum, 0) << '\n';
 
     if (seq.GetLength() >= 2) {
-        Sequence<int>* Sub = seq.GetSubsequence(0, seq.GetLength() - 2);
-        PrintSequence(*Sub, "Subsequence(0, n-2)");
-        delete Sub;
+        Sequence<int>* sub = seq.GetSubsequence(0, seq.GetLength() - 2);
+        PrintSequence(*sub, "Subsequence(0, n-2)");
+        delete sub;
     }
 }
 
@@ -252,9 +252,9 @@ void DemoStack() {
     if (stack.GetSize() >= 2) {
         const int start = ReadInt("Начальный индекс подпоследовательности: ");
         const int end = ReadInt("Конечный индекс подпоследовательности: ");
-        Stack<int>* Sub = stack.GetSubsequence(start, end);
-        PrintStack(*Sub, "Извлеченная подпоследовательность");
-        delete Sub;
+        Stack<int>* sub = stack.GetSubsequence(start, end);
+        PrintStack(*sub, "Извлеченная подпоследовательность");
+        delete sub;
     }
 
     std::cout << "--- Конкатенация и поиск подпоследовательности ---\n";
@@ -294,9 +294,9 @@ void DemoDeque() {
     if (deque.GetSize() >= 2) {
         const int start = ReadInt("Начальный индекс извлечения: ");
         const int end = ReadInt("Конечный индекс извлечения: ");
-        Deque<int>* Sub = deque.GetSubsequence(start, end);
-        PrintDeque(*Sub, "Извлеченная часть дека");
-        delete Sub;
+        Deque<int>* sub = deque.GetSubsequence(start, end);
+        PrintDeque(*sub, "Извлеченная часть дека");
+        delete sub;
     }
 
     Deque<int> second = BuildSequence<Deque<int>>(ReadElements("второго дека"));
@@ -311,12 +311,12 @@ void DemoPriorityQueue() {
     std::cout << "\n=== PriorityQueue ===\n";
 
     PriorityQueue<int> queue;
-    const int Count = ReadInt("Введите количество элементов: ");
-    if (Count < 0) {
+    const int count = ReadInt("Введите количество элементов: ");
+    if (count < 0) {
         throw std::invalid_argument("Количество элементов не может быть отрицательным");
     }
 
-    for (int i = 0; i < Count; ++i) {
+    for (int i = 0; i < count; ++i) {
         const int value = ReadInt("Введите значение: ");
         const int priority = ReadInt("Введите приоритет: ");
         queue.Push(value, priority);

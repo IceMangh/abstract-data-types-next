@@ -11,29 +11,29 @@ protected:
 
     virtual ListSequenceBase<T>* Instance() = 0;
 
-    Sequence<T>* AppendInternal(const T& Item) {
-        data_.Append(Item);
+    Sequence<T>* AppendInternal(const T& item) {
+        data_.Append(item);
         return this;
     }
 
-    Sequence<T>* PrependInternal(const T& Item) {
-        data_.Prepend(Item);
+    Sequence<T>* PrependInternal(const T& item) {
+        data_.Prepend(item);
         return this;
     }
 
-    Sequence<T>* InsertAtInternal(const T& Item, int index) {
-        data_.InsertAt(Item, index);
+    Sequence<T>* InsertAtInternal(const T& item, int index) {
+        data_.InsertAt(item, index);
         return this;
     }
 
 public:
     ListSequenceBase() : data_() {}
 
-    ListSequenceBase(const T* Items, int Count) : data_(Items, Count) {}
+    ListSequenceBase(const T* items, int count) : data_(items, count) {}
 
-    ListSequenceBase(const LinkedList<T>& List) : data_(List) {}
+    ListSequenceBase(const LinkedList<T>& list) : data_(list) {}
 
-    ListSequenceBase(const ListSequenceBase<T>& Other) : data_(Other.data_) {}
+    ListSequenceBase(const ListSequenceBase<T>& other) : data_(other.data_) {}
 
     const T& GetFirst() const override {
         return data_.GetFirst();
@@ -56,15 +56,15 @@ public:
             throw IndexOutOfRange();
         }
 
-        Sequence<T>* Result = this->CreateEmpty();
+        Sequence<T>* result = this->CreateEmpty();
 
         try {
             for (int i = startIndex; i <= endIndex; ++i) {
-                this->AppendToResult(Result, data_.Get(i));
+                this->AppendToResult(result, data_.Get(i));
             }
-            return Result;
+            return result;
         } catch (...) {
-            delete Result;
+            delete result;
             throw;
         }
     }
@@ -73,11 +73,11 @@ public:
         return new SequenceEnumerator<T>(*this);
     }
 
-    Sequence<T>* Append(const T& Item) override {
+    Sequence<T>* Append(const T& item) override {
         ListSequenceBase<T>* target = Instance();
 
         try {
-            return target->AppendInternal(Item);
+            return target->AppendInternal(item);
         } catch (...) {
             if (target != this) {
                 delete target;
@@ -86,11 +86,11 @@ public:
         }
     }
 
-    Sequence<T>* Prepend(const T& Item) override {
+    Sequence<T>* Prepend(const T& item) override {
         ListSequenceBase<T>* target = Instance();
 
         try {
-            return target->PrependInternal(Item);
+            return target->PrependInternal(item);
         } catch (...) {
             if (target != this) {
                 delete target;
@@ -99,11 +99,11 @@ public:
         }
     }
 
-    Sequence<T>* InsertAt(const T& Item, int index) override {
+    Sequence<T>* InsertAt(const T& item, int index) override {
         ListSequenceBase<T>* target = Instance();
 
         try {
-            return target->InsertAtInternal(Item, index);
+            return target->InsertAtInternal(item, index);
         } catch (...) {
             if (target != this) {
                 delete target;
@@ -113,18 +113,18 @@ public:
     }
 
     Sequence<T>* Concat(const Sequence<T>& other) const override {
-        Sequence<T>* Result = this->Clone();
+        Sequence<T>* result = this->Clone();
         IEnumerator<T>* enumerator = other.GetEnumerator();
 
         try {
             while (enumerator->MoveNext()) {
-                this->AppendToResult(Result, enumerator->Current());
+                this->AppendToResult(result, enumerator->Current());
             }
             delete enumerator;
-            return Result;
+            return result;
         } catch (...) {
             delete enumerator;
-            delete Result;
+            delete result;
             throw;
         }
     }

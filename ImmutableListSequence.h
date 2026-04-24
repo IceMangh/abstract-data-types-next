@@ -12,11 +12,11 @@ protected:
 public:
     ImmutableListSequence() : ListSequenceBase<T>() {}
 
-    ImmutableListSequence(const T* Items, int Count) : ListSequenceBase<T>(Items, Count) {}
+    ImmutableListSequence(const T* items, int count) : ListSequenceBase<T>(items, count) {}
 
-    ImmutableListSequence(const LinkedList<T>& List) : ListSequenceBase<T>(List) {}
+    ImmutableListSequence(const LinkedList<T>& list) : ListSequenceBase<T>(list) {}
 
-    ImmutableListSequence(const ImmutableListSequence<T>& Other) : ListSequenceBase<T>(Other) {}
+    ImmutableListSequence(const ImmutableListSequence<T>& other) : ListSequenceBase<T>(other) {}
 
     Sequence<T>* Clone() const override {
         return new ImmutableListSequence<T>(*this);
@@ -26,7 +26,7 @@ public:
         return new ImmutableListSequence<T>();
     }
 
-    static ImmutableListSequence<T> From(const T* Items, int Count) {
-        return ImmutableListSequence<T>(Items, Count);
+    static ImmutableListSequence<T> From(const T* items, int count) {
+        return ImmutableListSequence<T>(items, count);
     }
 };

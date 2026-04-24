@@ -6,9 +6,9 @@
 template <class T>
 class Sequence : public IEnumerable<T>, public ICollection<T> {
 protected:
-    void AppendToResult(Sequence<T>*& result, const T& Item) const {
+    void AppendToResult(Sequence<T>*& result, const T& item) const {
         Sequence<T>* current = result;
-        Sequence<T>* updated = current->Append(Item);
+        Sequence<T>* updated = current->Append(item);
 
         if (updated != current) {
             delete current;
@@ -29,9 +29,9 @@ public:
     }
 
     virtual Sequence<T>* GetSubsequence(int startIndex, int endIndex) const = 0;
-    virtual Sequence<T>* Append(const T& Item) = 0;
-    virtual Sequence<T>* Prepend(const T& Item) = 0;
-    virtual Sequence<T>* InsertAt(const T& Item, int index) = 0;
+    virtual Sequence<T>* Append(const T& item) = 0;
+    virtual Sequence<T>* Prepend(const T& item) = 0;
+    virtual Sequence<T>* InsertAt(const T& item, int index) = 0;
     virtual Sequence<T>* Concat(const Sequence<T>& other) const = 0;
 
     virtual Sequence<T>* Clone() const override = 0;

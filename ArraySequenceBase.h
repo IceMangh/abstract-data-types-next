@@ -12,46 +12,46 @@ protected:
 
     virtual ArraySequenceBase<T>* Instance() = 0;
 
-    Sequence<T>* AppendInternal(const T& Item) {
+    Sequence<T>* AppendInternal(const T& item) {
         const int oldSize = data_.GetSize();
         data_.Resize(oldSize + 1);
-        data_.Set(oldSize, Item);
+        data_.Set(oldSize, item);
         return this;
     }
 
-    Sequence<T>* PrependInternal(const T& Item) {
+    Sequence<T>* PrependInternal(const T& item) {
         const int oldSize = data_.GetSize();
         data_.Resize(oldSize + 1);
 
         for (int i = oldSize; i > 0; --i) {
             data_.Set(i, data_.Get(i - 1));
         }
-        data_.Set(0, Item);
+        data_.Set(0, item);
         return this;
     }
 
-    Sequence<T>* InsertAtInternal(const T& Item, int index) {
+    Sequence<T>* InsertAtInternal(const T& item, int index) {
         const int length = data_.GetSize();
         if (index < 0 || index > length) {
             throw IndexOutOfRange();
         }
 
         if (index == length) {
-            return AppendInternal(Item);
+            return AppendInternal(item);
         }
 
         data_.Resize(length + 1);
         for (int i = length; i > index; --i) {
             data_.Set(i, data_.Get(i - 1));
         }
-        data_.Set(index, Item);
+        data_.Set(index, item);
         return this;
     }
 
 public:
     ArraySequenceBase() : data_(0) {}
 
-    ArraySequenceBase(const T* Items, int count) : data_(Items, count) {}
+    ArraySequenceBase(const T* items, int count) : data_(items, count) {}
 
     ArraySequenceBase(const DynamicArray<T>& dynamicArray) : data_(dynamicArray) {}
 
@@ -101,11 +101,11 @@ public:
         return new SequenceEnumerator<T>(*this);
     }
 
-    Sequence<T>* Append(const T& Item) override {
+    Sequence<T>* Append(const T& item) override {
         ArraySequenceBase<T>* target = Instance();
 
         try {
-            return target->AppendInternal(Item);
+            return target->AppendInternal(item);
         } catch (...) {
             if (target != this) {
                 delete target;
@@ -114,11 +114,11 @@ public:
         }
     }
 
-    Sequence<T>* Prepend(const T& Item) override {
+    Sequence<T>* Prepend(const T& item) override {
         ArraySequenceBase<T>* target = Instance();
 
         try {
-            return target->PrependInternal(Item);
+            return target->PrependInternal(item);
         } catch (...) {
             if (target != this) {
                 delete target;
@@ -127,11 +127,11 @@ public:
         }
     }
 
-    Sequence<T>* InsertAt(const T& Item, int index) override {
+    Sequence<T>* InsertAt(const T& item, int index) override {
         ArraySequenceBase<T>* target = Instance();
 
         try {
-            return target->InsertAtInternal(Item, index);
+            return target->InsertAtInternal(item, index);
         } catch (...) {
             if (target != this) {
                 delete target;

@@ -6,36 +6,36 @@
 template <class T>
 class Stack {
 private:
-    MutableListSequence<T> Items_;
+    MutableListSequence<T> items_;
 
 public:
-    Stack() : Items_() {}
+    Stack() : items_() {}
 
-    Stack(const T* Items, int Count) : Items_(Items, Count) {}
+    Stack(const T* items, int count) : items_(items, count) {}
 
-    Stack(const Stack<T>& Other) = default;
+    Stack(const Stack<T>& other) = default;
 
     int GetSize() const {
-        return Items_.GetLength();
+        return items_.GetLength();
     }
 
     bool IsEmpty() const {
-        return Items_.IsEmpty();
+        return items_.IsEmpty();
     }
 
     const T& Top() const {
         if (IsEmpty()) {
             throw EmptyStructure("Stack is empty");
         }
-        return Items_.GetLast();
+        return items_.GetLast();
     }
 
     const T& Get(int index) const {
-        return Items_.Get(index);
+        return items_.Get(index);
     }
 
-    void Push(const T& Item) {
-        Items_.Append(Item);
+    void Push(const T& item) {
+        items_.Append(item);
     }
 
     T Pop() {
@@ -43,15 +43,15 @@ public:
             throw EmptyStructure("Stack is empty");
         }
 
-        return Items_.RemoveLast();
+        return items_.RemoveLast();
     }
 
-    Stack<T> Concat(const Stack<T>& Other) const {
-        Stack<T> Result(*this);
-        for (int i = 0; i < Other.GetSize(); ++i) {
-            Result.Push(Other.Get(i));
+    Stack<T> Concat(const Stack<T>& other) const {
+        Stack<T> result(*this);
+        for (int i = 0; i < other.GetSize(); ++i) {
+            result.Push(other.Get(i));
         }
-        return Result;
+        return result;
     }
 
     Stack<T>* GetSubsequence(int startIndex, int endIndex) const {
@@ -59,11 +59,11 @@ public:
             throw IndexOutOfRange();
         }
 
-        Stack<T>* Result = new Stack<T>();
+        Stack<T>* result = new Stack<T>();
         for (int i = startIndex; i <= endIndex; ++i) {
-            Result->Push(Get(i));
+            result->Push(Get(i));
         }
-        return Result;
+        return result;
     }
 
     int FindSubsequence(const Stack<T>& pattern) const {
@@ -91,49 +91,49 @@ public:
 
     template <class Mapper>
     Stack<T> Map(Mapper mapper) const {
-        Stack<T> Result;
+        Stack<T> result;
         for (int i = 0; i < GetSize(); ++i) {
-            Result.Push(mapper(Get(i)));
+            result.Push(mapper(Get(i)));
         }
-        return Result;
+        return result;
     }
 
     template <class Predicate>
     Stack<T> Where(Predicate predicate) const {
-        Stack<T> Result;
+        Stack<T> result;
         for (int i = 0; i < GetSize(); ++i) {
             if (predicate(Get(i))) {
-                Result.Push(Get(i));
+                result.Push(Get(i));
             }
         }
-        return Result;
+        return result;
     }
 
     template <class Reducer>
     T Reduce(Reducer reducer, T start) const {
-        T Result = start;
+        T result = start;
         for (int i = 0; i < GetSize(); ++i) {
-            Result = reducer(Result, Get(i));
+            result = reducer(result, Get(i));
         }
-        return Result;
+        return result;
     }
 
-    bool operator==(const Stack<T>& Other) const {
-        if (GetSize() != Other.GetSize()) {
+    bool operator==(const Stack<T>& other) const {
+        if (GetSize() != other.GetSize()) {
             return false;
         }
 
         for (int i = 0; i < GetSize(); ++i) {
-            if (Get(i) != Other.Get(i)) {
+            if (Get(i) != other.Get(i)) {
                 return false;
             }
         }
         return true;
     }
 
-    Stack<T>& operator=(const Stack<T>& Other) = default;
+    Stack<T>& operator=(const Stack<T>& other) = default;
 
-    bool operator!=(const Stack<T>& Other) const {
-        return !(*this == Other);
+    bool operator!=(const Stack<T>& other) const {
+        return !(*this == other);
     }
 };

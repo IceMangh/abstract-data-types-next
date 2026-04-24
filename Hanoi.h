@@ -21,8 +21,8 @@ enum HanoiColor {
 
 struct HanoiItem {
     int size;
-    HanoiItemType ItemType;
-    HanoiColor Color;
+    HanoiItemType itemType;
+    HanoiColor color;
 };
 
 inline int ReadHanoiInt(const char* prompt) {
@@ -122,11 +122,11 @@ inline void PrintCenteredItem(const HanoiItem& item, int maxWidth) {
         std::cout << ' ';
     }
 
-    std::cout << GetAnsiColor(item.Color);
+    std::cout << GetAnsiColor(item.color);
 
     for (int i = 0; i < width; ++i) {
         if (i == width / 2) {
-            std::cout << GetItemSymbol(item.ItemType);
+            std::cout << GetItemSymbol(item.itemType);
         } else {
             std::cout << '=';
         }
@@ -215,8 +215,8 @@ inline void MoveHanoiItem(Stack<HanoiItem> rods[3], int from, int to, int& moveC
     ++moveCount;
 
     std::cout << "Ход " << moveCount << ": "
-              << GetItemTypeName(item.ItemType) << " "
-              << GetColorName(item.Color)
+              << GetItemTypeName(item.itemType) << " "
+              << GetColorName(item.color)
               << " размера " << item.size
               << " : " << from + 1 << " -> " << to + 1 << "\n";
 
@@ -256,8 +256,8 @@ inline void DemoHanoi() {
 
         HanoiItem item;
         item.size = i + 1;
-        item.ItemType = ReadItemType();
-        item.Color = ReadColor();
+        item.itemType = ReadItemType();
+        item.color = ReadColor();
 
         items.Set(i, item);
         std::cout << '\n';

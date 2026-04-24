@@ -12,11 +12,11 @@ protected:
 public:
     MutableListSequence() : ListSequenceBase<T>() {}
 
-    MutableListSequence(const T* Items, int Count) : ListSequenceBase<T>(Items, Count) {}
+    MutableListSequence(const T* items, int count) : ListSequenceBase<T>(items, count) {}
 
-    MutableListSequence(const LinkedList<T>& List) : ListSequenceBase<T>(List) {}
+    MutableListSequence(const LinkedList<T>& list) : ListSequenceBase<T>(list) {}
 
-    MutableListSequence(const MutableListSequence<T>& Other) : ListSequenceBase<T>(Other) {}
+    MutableListSequence(const MutableListSequence<T>& other) : ListSequenceBase<T>(other) {}
 
     bool IsEmpty() const {
         return this->data_.IsEmpty();
@@ -46,7 +46,7 @@ public:
         return new MutableListSequence<T>();
     }
 
-    static MutableListSequence<T> From(const T* Items, int Count) {
-        return MutableListSequence<T>(Items, Count);
+    static MutableListSequence<T> From(const T* items, int count) {
+        return MutableListSequence<T>(items, count);
     }
 };

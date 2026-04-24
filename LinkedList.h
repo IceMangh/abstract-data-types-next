@@ -41,28 +41,28 @@ private:
 public:
     LinkedList() : head_(nullptr), tail_(nullptr), length_(0) {}
 
-    LinkedList(const T* Items, int Count) : head_(nullptr), tail_(nullptr), length_(0) {
-        if (Count < 0) {
-            throw std::invalid_argument("Negative Count");
+    LinkedList(const T* items, int count) : head_(nullptr), tail_(nullptr), length_(0) {
+        if (count < 0) {
+            throw std::invalid_argument("Negative count");
         }
 
-        for (int i = 0; i < Count; ++i) {
-            Append(Items[i]);
+        for (int i = 0; i < count; ++i) {
+            Append(items[i]);
         }
     }
 
-    LinkedList(const LinkedList<T>& Other) : head_(nullptr), tail_(nullptr), length_(0) {
-        Node* cur = Other.head_;
+    LinkedList(const LinkedList<T>& other) : head_(nullptr), tail_(nullptr), length_(0) {
+        Node* cur = other.head_;
         while (cur != nullptr) {
             Append(cur->data);
             cur = cur->next;
         }
     }
 
-    LinkedList<T>& operator=(const LinkedList<T>& Other) {
-        if (this != &Other) {
+    LinkedList<T>& operator=(const LinkedList<T>& other) {
+        if (this != &other) {
             Clear();
-            Node* cur = Other.head_;
+            Node* cur = other.head_;
             while (cur != nullptr) {
                 Append(cur->data);
                 cur = cur->next;
@@ -94,14 +94,14 @@ public:
 
     const T& GetFirst() const {
         if (length_ == 0) {
-            throw EmptyStructure("List is empty");
+            throw EmptyStructure("list is empty");
         }
         return head_->data;
     }
 
     const T& GetLast() const {
         if (length_ == 0) {
-            throw EmptyStructure("List is empty");
+            throw EmptyStructure("list is empty");
         }
         return tail_->data;
     }
@@ -123,15 +123,15 @@ public:
             throw IndexOutOfRange();
         }
 
-        LinkedList<T>* Result = new LinkedList<T>();
+        LinkedList<T>* result = new LinkedList<T>();
         for (int i = startIndex; i <= endIndex; ++i) {
-            Result->Append(Get(i));
+            result->Append(Get(i));
         }
-        return Result;
+        return result;
     }
 
-    void Append(const T& Item) {
-        Node* node = new Node(Item, nullptr, tail_);
+    void Append(const T& item) {
+        Node* node = new Node(item, nullptr, tail_);
 
         if (length_ == 0) {
             head_ = tail_ = node;
@@ -143,8 +143,8 @@ public:
         ++length_;
     }
 
-    void Prepend(const T& Item) {
-        Node* node = new Node(Item, head_, nullptr);
+    void Prepend(const T& item) {
+        Node* node = new Node(item, head_, nullptr);
 
         if (length_ == 0) {
             head_ = tail_ = node;
@@ -156,24 +156,24 @@ public:
         ++length_;
     }
 
-    void InsertAt(const T& Item, int index) {
+    void InsertAt(const T& item, int index) {
         if (index < 0 || index > length_) {
             throw IndexOutOfRange();
         }
 
         if (index == 0) {
-            Prepend(Item);
+            Prepend(item);
             return;
         }
 
         if (index == length_) {
-            Append(Item);
+            Append(item);
             return;
         }
 
         Node* current = GetNode(index);
         Node* previous = current->prev;
-        Node* node = new Node(Item, current, previous);
+        Node* node = new Node(item, current, previous);
 
         previous->next = node;
         current->prev = node;
@@ -182,7 +182,7 @@ public:
 
     T RemoveFirst() {
         if (length_ == 0) {
-            throw EmptyStructure("List is empty");
+            throw EmptyStructure("list is empty");
         }
 
         Node* node = head_;
@@ -203,7 +203,7 @@ public:
 
     T RemoveLast() {
         if (length_ == 0) {
-            throw EmptyStructure("List is empty");
+            throw EmptyStructure("list is empty");
         }
 
         Node* node = tail_;
@@ -222,12 +222,12 @@ public:
         return value;
     }
 
-    LinkedList<T>* Concat(const LinkedList<T>* Other) const {
-        LinkedList<T>* Result = new LinkedList<T>(*this);
-        for (int i = 0; i < Other->GetLength(); ++i) {
-            Result->Append(Other->Get(i));
+    LinkedList<T>* Concat(const LinkedList<T>* other) const {
+        LinkedList<T>* result = new LinkedList<T>(*this);
+        for (int i = 0; i < other->GetLength(); ++i) {
+            result->Append(other->Get(i));
         }
-        return Result;
+        return result;
     }
 
     T& operator[](int index) {

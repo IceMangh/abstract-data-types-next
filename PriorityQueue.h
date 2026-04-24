@@ -5,65 +5,65 @@
 
 template <class T>
 struct PriorityQueueItem {
-    T Value;
-    int Priority;
+    T value;
+    int priority;
 
-    PriorityQueueItem() : Value(), Priority(0) {}
+    PriorityQueueItem() : value(), priority(0) {}
 
-    PriorityQueueItem(const T& Value, int Priority)
-            : Value(Value), Priority(Priority) {}
+    PriorityQueueItem(const T& value, int priority)
+            : value(value), priority(priority) {}
 };
 
 template <class T>
 class PriorityQueue {
 private:
-    using Item = PriorityQueueItem<T>;
-    MutableListSequence<Item> Items_;
+    using QueueItem = PriorityQueueItem<T>;
+    MutableListSequence<QueueItem> items_;
 
 public:
-    PriorityQueue() : Items_() {}
+    PriorityQueue() : items_() {}
 
-    PriorityQueue(const PriorityQueue<T>& Other) = default;
+    PriorityQueue(const PriorityQueue<T>& other) = default;
 
     int GetSize() const {
-        return Items_.GetLength();
+        return items_.GetLength();
     }
 
     bool IsEmpty() const {
-        return Items_.IsEmpty();
+        return items_.IsEmpty();
     }
 
     const T& Top() const {
         if (IsEmpty()) {
             throw EmptyStructure("PriorityQueue is empty");
         }
-        return Items_.GetFirst().Value;
+        return items_.GetFirst().value;
     }
 
     int TopPriority() const {
         if (IsEmpty()) {
             throw EmptyStructure("PriorityQueue is empty");
         }
-        return Items_.GetFirst().Priority;
+        return items_.GetFirst().priority;
     }
 
     const T& GetValue(int index) const {
-        return Items_.Get(index).Value;
+        return items_.Get(index).value;
     }
 
     int GetPriority(int index) const {
-        return Items_.Get(index).Priority;
+        return items_.Get(index).priority;
     }
 
-    void Push(const T& Value, int Priority) {
-        Item item(Value, Priority);
+    void Push(const T& value, int priority) {
+        QueueItem item(value, priority);
 
         int insertIndex = 0;
-        while (insertIndex < GetSize() && Items_.Get(insertIndex).Priority <= Priority) {
+        while (insertIndex < GetSize() && items_.Get(insertIndex).priority <= priority) {
             ++insertIndex;
         }
 
-        Items_.InsertAt(item, insertIndex);
+        items_.InsertAt(item, insertIndex);
     }
 
     T Pop() {
@@ -71,16 +71,16 @@ public:
             throw EmptyStructure("PriorityQueue is empty");
         }
 
-        return Items_.RemoveFirst().Value;
+        return items_.RemoveFirst().value;
     }
 
-    bool operator==(const PriorityQueue<T>& Other) const {
-        if (GetSize() != Other.GetSize()) {
+    bool operator==(const PriorityQueue<T>& other) const {
+        if (GetSize() != other.GetSize()) {
             return false;
         }
 
         for (int i = 0; i < GetSize(); ++i) {
-            if (GetValue(i) != Other.GetValue(i) || GetPriority(i) != Other.GetPriority(i)) {
+            if (GetValue(i) != other.GetValue(i) || GetPriority(i) != other.GetPriority(i)) {
                 return false;
             }
         }
@@ -88,9 +88,9 @@ public:
         return true;
     }
 
-    PriorityQueue<T>& operator=(const PriorityQueue<T>& Other) = default;
+    PriorityQueue<T>& operator=(const PriorityQueue<T>& other) = default;
 
-    bool operator!=(const PriorityQueue<T>& Other) const {
-        return !(*this == Other);
+    bool operator!=(const PriorityQueue<T>& other) const {
+        return !(*this == other);
     }
 };
