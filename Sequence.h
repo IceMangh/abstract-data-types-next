@@ -22,11 +22,7 @@ public:
     virtual const T& GetFirst() const = 0;
     virtual const T& GetLast() const = 0;
     virtual const T& Get(int index) const override = 0;
-    virtual int GetLength() const = 0;
-
-    int GetCount() const override {
-        return GetLength();
-    }
+    virtual int GetLength() const override = 0;
 
     virtual Sequence<T>* GetSubsequence(int startIndex, int endIndex) const = 0;
     virtual Sequence<T>* Append(const T& item) = 0;

@@ -3,7 +3,6 @@
 #include "DynamicArray.h"
 #include "Exceptions.h"
 #include "Sequence.h"
-#include "SequenceEnumerator.h"
 
 template <class T>
 class ArraySequenceBase : public Sequence<T> {
@@ -13,17 +12,17 @@ protected:
     virtual ArraySequenceBase<T>* Instance() = 0;
 
     Sequence<T>* AppendInternal(const T& item) {
-        const int oldSize = data_.GetSize();
-        data_.Resize(oldSize + 1);
-        data_.Set(oldSize, item);
+        const int oldLength = data_.GetLength();
+        data_.Resize(oldLength + 1);
+        data_.Set(oldLength, item);
         return this;
     }
 
     Sequence<T>* PrependInternal(const T& item) {
-        const int oldSize = data_.GetSize();
-        data_.Resize(oldSize + 1);
+        const int oldLength = data_.GetLength();
+        data_.Resize(oldLength + 1);
 
-        for (int i = oldSize; i > 0; --i) {
+        for (int i = oldLength; i > 0; --i) {
             data_.Set(i, data_.Get(i - 1));
         }
         data_.Set(0, item);
@@ -31,7 +30,7 @@ protected:
     }
 
     Sequence<T>* InsertAtInternal(const T& item, int index) {
-        const int length = data_.GetSize();
+        const int length = data_.GetLength();
         if (index < 0 || index > length) {
             throw IndexOutOfRange();
         }
@@ -58,17 +57,17 @@ public:
     ArraySequenceBase(const ArraySequenceBase<T>& other) : data_(other.data_) {}
 
     const T& GetFirst() const override {
-        if (data_.GetSize() == 0) {
+        if (data_.GetLength() == 0) {
             throw EmptyStructure();
         }
         return data_.Get(0);
     }
 
     const T& GetLast() const override {
-        if (data_.GetSize() == 0) {
+        if (data_.GetLength() == 0) {
             throw EmptyStructure();
         }
-        return data_.Get(data_.GetSize() - 1);
+        return data_.Get(data_.GetLength() - 1);
     }
 
     const T& Get(int index) const override {
@@ -76,7 +75,7 @@ public:
     }
 
     Sequence<T>* GetSubsequence(int startIndex, int endIndex) const override {
-        if (startIndex < 0 || endIndex < 0 || startIndex > endIndex || endIndex >= data_.GetSize()) {
+        if (startIndex < 0 || endIndex < 0 || startIndex > endIndex || endIndex >= data_.GetLength()) {
             throw IndexOutOfRange();
         }
 
@@ -94,11 +93,11 @@ public:
     }
 
     int GetLength() const override {
-        return data_.GetSize();
+        return data_.GetLength();
     }
 
     IEnumerator<T>* GetEnumerator() const override {
-        return new SequenceEnumerator<T>(*this);
+        return data_.GetEnumerator();
     }
 
     Sequence<T>* Append(const T& item) override {

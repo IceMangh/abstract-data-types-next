@@ -2,7 +2,6 @@
 
 #include "LinkedList.h"
 #include "Sequence.h"
-#include "SequenceEnumerator.h"
 
 template <class T>
 class ListSequenceBase : public Sequence<T> {
@@ -57,20 +56,30 @@ public:
         }
 
         Sequence<T>* result = this->CreateEmpty();
+        IEnumerator<T>* enumerator = data_.GetEnumerator();
 
         try {
-            for (int i = startIndex; i <= endIndex; ++i) {
-                this->AppendToResult(result, data_.Get(i));
+            int i = -1;
+            while (enumerator->MoveNext()) {
+                ++i;
+                if (i > endIndex) {
+                    break;
+                }
+                if (i >= startIndex) {
+                    this->AppendToResult(result, enumerator->Current());
+                }
             }
+            delete enumerator;
             return result;
         } catch (...) {
+            delete enumerator;
             delete result;
             throw;
         }
     }
 
     IEnumerator<T>* GetEnumerator() const override {
-        return new SequenceEnumerator<T>(*this);
+        return data_.GetEnumerator();
     }
 
     Sequence<T>* Append(const T& item) override {

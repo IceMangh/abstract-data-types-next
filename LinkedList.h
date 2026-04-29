@@ -1,6 +1,7 @@
 #pragma once
 #include <stdexcept>
 #include "Exceptions.h"
+#include "IEnumerator.h"
 
 template <class T>
 class LinkedList {
@@ -39,6 +40,27 @@ private:
     }
 
 public:
+    class Enumerator : public IEnumerator<T> {
+    private:
+        Node* current_;
+        Node* next_;
+
+    public:
+        explicit Enumerator(Node* head) : current_(nullptr), next_(head) {}
+
+        bool MoveNext() override {
+            current_ = next_;
+            if (next_ != nullptr) {
+                next_ = next_->next;
+            }
+            return current_ != nullptr;
+        }
+
+        T Current() const override {
+            return current_->data;
+        }
+    };
+
     LinkedList() : head_(nullptr), tail_(nullptr), length_(0) {}
 
     LinkedList(const T* items, int count) : head_(nullptr), tail_(nullptr), length_(0) {
@@ -124,8 +146,10 @@ public:
         }
 
         LinkedList<T>* result = new LinkedList<T>();
+        Node* current = GetNode(startIndex);
         for (int i = startIndex; i <= endIndex; ++i) {
-            result->Append(Get(i));
+            result->Append(current->data);
+            current = current->next;
         }
         return result;
     }
@@ -224,10 +248,16 @@ public:
 
     LinkedList<T>* Concat(const LinkedList<T>* other) const {
         LinkedList<T>* result = new LinkedList<T>(*this);
-        for (int i = 0; i < other->GetLength(); ++i) {
-            result->Append(other->Get(i));
+        Node* current = other->head_;
+        while (current != nullptr) {
+            result->Append(current->data);
+            current = current->next;
         }
         return result;
+    }
+
+    IEnumerator<T>* GetEnumerator() const {
+        return new Enumerator(head_);
     }
 
     T& operator[](int index) {

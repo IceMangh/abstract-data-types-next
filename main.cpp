@@ -108,6 +108,18 @@ void PrintPriorityQueue(const PriorityQueue<int>& queue, const std::string& titl
     std::cout << "]\n";
 }
 
+static int Double(int x) {
+    return x * 2;
+}
+
+static bool IsEven(int x) {
+    return x % 2 == 0;
+}
+
+static int Sum(int a, int b) {
+    return a + b;
+}
+
 void ShowAlgorithms(const Sequence<int>& seq) {
     Sequence<int>* mapped = seq.Map(Double);
     PrintSequence(*mapped, "Map(x2)");
@@ -142,7 +154,6 @@ void DemoMutableArraySequence() {
 
     PrintCommonInfo(sequence);
     ShowAlgorithms(sequence);
-    std::cout << "Вывод: mutable-версия меняет исходный объект.\n";
 }
 
 void DemoImmutableArraySequence() {
@@ -168,7 +179,6 @@ void DemoImmutableArraySequence() {
 
     PrintCommonInfo(*inserted);
     ShowAlgorithms(*inserted);
-    std::cout << "Вывод: immutable-версия не меняет исходный объект, а возвращает новую последовательность.\n";
 
     delete appended;
     delete prepended;
@@ -195,7 +205,6 @@ void DemoMutableListSequence() {
 
     PrintCommonInfo(sequence);
     ShowAlgorithms(sequence);
-    std::cout << "Вывод: mutable-версия меняет исходный объект.\n";
 }
 
 void DemoImmutableListSequence() {
@@ -221,7 +230,6 @@ void DemoImmutableListSequence() {
 
     PrintCommonInfo(*inserted);
     ShowAlgorithms(*inserted);
-    std::cout << "Вывод: immutable-версия не меняет исходный объект, а возвращает новую последовательность.\n";
 
     delete appended;
     delete prepended;
