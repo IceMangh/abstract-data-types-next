@@ -1,7 +1,9 @@
 #include "Tests.h"
 #include <cassert>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 
 #include "DynamicArray.h"
 #include "LinkedList.h"
@@ -12,6 +14,7 @@
 #include "Stack.h"
 #include "Deque.h"
 #include "PriorityQueue.h"
+#include "Hanoi.h"
 
 static int Double(int x) {
     return x * 2;
@@ -29,6 +32,51 @@ static int Multiply(int a, int b) {
     return a * b;
 }
 
+static bool Greater(int a, int b) {
+    return a > b;
+}
+
+class CoutSilencer {
+private:
+    std::ostringstream buffer_;
+    std::streambuf* original_;
+
+public:
+    CoutSilencer() : original_(std::cout.rdbuf(buffer_.rdbuf())) {}
+
+    ~CoutSilencer() {
+        std::cout.rdbuf(original_);
+    }
+};
+
+class CinRedirect {
+private:
+    std::istringstream input_;
+    std::streambuf* original_;
+
+public:
+    explicit CinRedirect(const std::string& text)
+            : input_(text), original_(std::cin.rdbuf(input_.rdbuf())) {
+        std::cin.clear();
+    }
+
+    ~CinRedirect() {
+        std::cin.rdbuf(original_);
+        std::cin.clear();
+    }
+};
+
+template <class Exception, class Action>
+void ExpectThrows(Action action) {
+    bool thrown = false;
+    try {
+        action();
+    } catch (const Exception&) {
+        thrown = true;
+    }
+    assert(thrown);
+}
+
 void TestDynamicArray() {
     int data[] = {1, 2, 3};
     DynamicArray<DynamicArray<int>> arr(3);
@@ -44,13 +92,12 @@ void TestDynamicArray() {
 
 void TestDynamicArrayExceptions() {
     DynamicArray<int> arr(2);
-    bool thrown = false;
-    try {
+    ExpectThrows<IndexOutOfRange>([&arr]() {
         arr.Get(3);
-    } catch (const IndexOutOfRange&) {
-        thrown = true;
-    }
-    assert(thrown);
+    });
+    ExpectThrows<IndexOutOfRange>([&arr]() {
+        arr.Set(-1, 10);
+    });
 }
 
 void TestLinkedList() {
@@ -64,6 +111,44 @@ void TestLinkedList() {
     assert(list.GetFirst() == 0);
     assert(list.Get(2) == 99);
     assert(list.GetLast() == 4);
+
+    list.Set(2, 100);
+    assert(list.Get(2) == 100);
+
+    list[2] = 99;
+    assert(list.Get(2) == 99);
+}
+
+void TestLinkedListNewOperations() {
+    int data[] = {1, 2, 3, 4};
+    LinkedList<int> list(data, 4);
+
+    assert(!list.IsEmpty());
+    assert(list.RemoveFirst() == 1);
+    assert(list.RemoveLast() == 4);
+    assert(list.GetLength() == 2);
+    assert(list.GetFirst() == 2);
+    assert(list.GetLast() == 3);
+
+    list.Prepend(1);
+    list.Append(4);
+    LinkedList<int>* sub = list.GetSubList(1, 2);
+    assert(sub->GetLength() == 2);
+    assert(sub->Get(0) == 2);
+    assert(sub->Get(1) == 3);
+
+    LinkedList<int> copy = list;
+    list.Set(1, 20);
+    assert(copy.Get(1) == 2);
+    assert(list.Get(1) == 20);
+
+    list.Clear();
+    assert(list.IsEmpty());
+    ExpectThrows<EmptyStructure>([&list]() {
+        list.GetFirst();
+    });
+
+    delete sub;
 }
 
 void TestArraySequence() {
@@ -344,15 +429,21 @@ void TestMutableVsImmutableDifference() {
 
 void TestStackBasic() {
     Stack<int> stack;
+    assert(stack.IsEmpty());
+
     stack.Push(1);
     stack.Push(2);
     stack.Push(3);
 
     assert(stack.GetSize() == 3);
+    assert(!stack.IsEmpty());
     assert(stack.Top() == 3);
+    assert(stack.Get(0) == 1);
+    assert(stack.Get(1) == 2);
+    assert(stack.Get(2) == 3);
     assert(stack.Pop() == 3);
     assert(stack.Top() == 2);
-    assert(stack.Get(0) == 1);
+    assert(stack.GetSize() == 2);
 }
 
 void TestStackAlgorithms() {
@@ -362,6 +453,9 @@ void TestStackAlgorithms() {
     Stack<int> mapped = stack.Map(Double);
     Stack<int> filtered = stack.Where(IsEven);
     Stack<int>* sub = stack.GetSubsequence(1, 2);
+    Stack<int> noMatches = stack.Where([](int value) {
+        return value > 10;
+    });
 
     assert(mapped.Get(0) == 2);
     assert(mapped.Get(3) == 8);
@@ -371,7 +465,9 @@ void TestStackAlgorithms() {
     assert(sub->GetSize() == 2);
     assert(sub->Get(0) == 2);
     assert(sub->Get(1) == 3);
+    assert(noMatches.IsEmpty());
     assert(stack.Reduce(Sum, 0) == 10);
+    assert(stack.Reduce(Multiply, 1) == 24);
 
     delete sub;
 }
@@ -389,39 +485,73 @@ void TestStackConcatAndSearch() {
     assert(joined.GetSize() == 5);
     assert(joined.Top() == 5);
     assert(joined.FindSubsequence(pattern) == 1);
+    assert(left.GetSize() == 3);
+    assert(right.GetSize() == 2);
+    assert(joined.Get(3) == 4);
+    assert(joined.Get(4) == 5);
+}
+
+void TestStackSubsequenceSearchExamples() {
+    int data[] = {1, 2, 3, 2, 3, 4};
+    int repeatedPatternData[] = {2, 3};
+    int missingPatternData[] = {3, 5};
+    int longPatternData[] = {1, 2, 3, 4, 5, 6, 7};
+
+    Stack<int> stack(data, 6);
+    Stack<int> repeatedPattern(repeatedPatternData, 2);
+    Stack<int> missingPattern(missingPatternData, 2);
+    Stack<int> longPattern(longPatternData, 7);
+    Stack<int> emptyPattern;
+
+    assert(stack.FindSubsequence(repeatedPattern) == 1);
+    assert(stack.FindSubsequence(missingPattern) == -1);
+    assert(stack.FindSubsequence(longPattern) == -1);
+    assert(stack.FindSubsequence(emptyPattern) == 0);
+
+    Stack<int> copy = stack;
+    assert(copy == stack);
+    copy.Pop();
+    assert(copy != stack);
 }
 
 void TestStackExceptions() {
     Stack<int> stack;
-    bool thrown = false;
-    try {
+    ExpectThrows<EmptyStructure>([&stack]() {
         stack.Pop();
-    } catch (const EmptyStructure&) {
-        thrown = true;
-    }
-    assert(thrown);
-
-    thrown = false;
-    try {
+    });
+    ExpectThrows<EmptyStructure>([&stack]() {
+        stack.Top();
+    });
+    ExpectThrows<IndexOutOfRange>([&stack]() {
         stack.GetSubsequence(0, 0);
-    } catch (const IndexOutOfRange&) {
-        thrown = true;
-    }
-    assert(thrown);
+    });
+    ExpectThrows<IndexOutOfRange>([&stack]() {
+        stack.Get(0);
+    });
 }
 
 void TestDequeBasic() {
     Deque<int> deque;
+    assert(deque.IsEmpty());
+
     deque.PushBack(2);
     deque.PushFront(1);
     deque.PushBack(3);
 
     assert(deque.GetSize() == 3);
+    assert(!deque.IsEmpty());
     assert(deque.Front() == 1);
     assert(deque.Back() == 3);
+    assert(deque.Get(0) == 1);
+    assert(deque.Get(1) == 2);
+    assert(deque.Get(2) == 3);
     assert(deque.PopFront() == 1);
     assert(deque.PopBack() == 3);
     assert(deque.Front() == 2);
+    assert(deque.Back() == 2);
+
+    deque.Clear();
+    assert(deque.IsEmpty());
 }
 
 void TestDequeAlgorithms() {
@@ -442,7 +572,12 @@ void TestDequeAlgorithms() {
     assert(sub->Get(0) == 1);
     assert(sub->Get(2) == 2);
     assert(concat.GetSize() == 7);
+    assert(concat.Get(0) == 5);
+    assert(concat.Get(4) == 3);
+    assert(concat.Get(5) == 4);
+    assert(concat.Get(6) == 2);
     assert(deque.Reduce(Sum, 0) == 15);
+    assert(deque.Reduce(Multiply, 1) == 120);
 
     delete sub;
 }
@@ -455,25 +590,55 @@ void TestDequeSort() {
     for (int i = 0; i < 5; ++i) {
         assert(deque.Get(i) == i + 1);
     }
+
+    deque.Sort(Greater);
+    for (int i = 0; i < 5; ++i) {
+        assert(deque.Get(i) == 5 - i);
+    }
+}
+
+void TestDequeSetAndComparison() {
+    int data[] = {1, 2, 3};
+    Deque<int> first(data, 3);
+    Deque<int> second(data, 3);
+
+    assert(first == second);
+
+    first.Set(1, 20);
+    assert(first.Get(1) == 20);
+    assert(first != second);
+
+    second = first;
+    assert(first == second);
+
+    Deque<int>* sub = first.GetSubsequence(0, 1);
+    assert(sub->GetSize() == 2);
+    assert(sub->Get(0) == 1);
+    assert(sub->Get(1) == 20);
+
+    delete sub;
 }
 
 void TestDequeExceptions() {
     Deque<int> deque;
-    bool thrown = false;
-    try {
+    ExpectThrows<EmptyStructure>([&deque]() {
         deque.PopFront();
-    } catch (const EmptyStructure&) {
-        thrown = true;
-    }
-    assert(thrown);
-
-    thrown = false;
-    try {
+    });
+    ExpectThrows<EmptyStructure>([&deque]() {
+        deque.PopBack();
+    });
+    ExpectThrows<EmptyStructure>([&deque]() {
+        deque.Front();
+    });
+    ExpectThrows<EmptyStructure>([&deque]() {
+        deque.Back();
+    });
+    ExpectThrows<IndexOutOfRange>([&deque]() {
         deque.Get(0);
-    } catch (const IndexOutOfRange&) {
-        thrown = true;
-    }
-    assert(thrown);
+    });
+    ExpectThrows<IndexOutOfRange>([&deque]() {
+        deque.GetSubsequence(0, 0);
+    });
 }
 
 void TestPriorityQueueBasic() {
@@ -481,18 +646,130 @@ void TestPriorityQueueBasic() {
     queue.Push(10, 3);
     queue.Push(20, 1);
     queue.Push(30, 2);
+    queue.Push(40, 1);
 
-    assert(queue.GetSize() == 3);
+    assert(queue.GetSize() == 4);
     assert(queue.Top() == 20);
     assert(queue.TopPriority() == 1);
+    assert(queue.GetValue(0) == 20);
+    assert(queue.GetPriority(0) == 1);
+    assert(queue.GetValue(1) == 40);
+    assert(queue.GetPriority(1) == 1);
+    assert(queue.GetValue(2) == 30);
+    assert(queue.GetPriority(2) == 2);
+    assert(queue.GetValue(3) == 10);
+    assert(queue.GetPriority(3) == 3);
     assert(queue.Pop() == 20);
+    assert(queue.Pop() == 40);
     assert(queue.Top() == 30);
+    assert(queue.TopPriority() == 2);
+}
+
+void TestPriorityQueueComparisonAndExceptions() {
+    PriorityQueue<int> first;
+    PriorityQueue<int> second;
+
+    first.Push(1, 2);
+    first.Push(2, 1);
+    second.Push(1, 2);
+    second.Push(2, 1);
+
+    assert(first == second);
+    assert(first.Pop() == 2);
+    assert(first != second);
+
+    PriorityQueue<int> empty;
+    assert(empty.IsEmpty());
+    ExpectThrows<EmptyStructure>([&empty]() {
+        empty.Top();
+    });
+    ExpectThrows<EmptyStructure>([&empty]() {
+        empty.TopPriority();
+    });
+    ExpectThrows<EmptyStructure>([&empty]() {
+        empty.Pop();
+    });
+    ExpectThrows<IndexOutOfRange>([&empty]() {
+        empty.GetValue(0);
+    });
+}
+
+void TestHanoiLabels() {
+    assert(std::string(GetItemTypeName(ITEM_RING)) == "Ring");
+    assert(std::string(GetItemTypeName(ITEM_BOOK)) == "Book");
+    assert(std::string(GetColorName(COLOR_RED)) == "Red");
+    assert(std::string(GetColorName(COLOR_YELLOW)) == "Yellow");
+    assert(std::string(GetItemSymbol(ITEM_BOX)) == "#");
+    assert(std::string(GetItemSymbol(ITEM_DISC)) == "@");
+}
+
+void TestHanoiInvalidIntegerInput() {
+    CoutSilencer silence;
+    CinRedirect input("wrong\n3\n");
+
+    assert(ReadHanoiInt("test: ") == 3);
+}
+
+void TestHanoiGeneratedItems() {
+    DynamicArray<HanoiItem> emptyItems = GenerateHanoiItems(0);
+    assert(emptyItems.GetLength() == 0);
+
+    DynamicArray<HanoiItem> items = GenerateHanoiItems(6);
+    assert(items.GetLength() == 6);
+
+    for (int i = 0; i < items.GetLength(); ++i) {
+        const HanoiItem& item = items.Get(i);
+        assert(item.size == i + 1);
+        assert(item.itemType >= ITEM_RING);
+        assert(item.itemType <= ITEM_DISC);
+        assert(item.color >= COLOR_RED);
+        assert(item.color <= COLOR_YELLOW);
+    }
+}
+
+void TestHanoiSolveThreeItems() {
+    Stack<HanoiItem> rods[3];
+    rods[0].Push({3, ITEM_DISC, COLOR_RED});
+    rods[0].Push({2, ITEM_BOX, COLOR_BLUE});
+    rods[0].Push({1, ITEM_RING, COLOR_GREEN});
+
+    int moveCount = 0;
+    {
+        CoutSilencer silence;
+        SolveHanoi(3, 0, 2, 1, rods, moveCount, 3);
+    }
+
+    assert(moveCount == 7);
+    assert(rods[0].IsEmpty());
+    assert(rods[1].IsEmpty());
+    assert(rods[2].GetSize() == 3);
+    assert(rods[2].Get(0).size == 3);
+    assert(rods[2].Get(1).size == 2);
+    assert(rods[2].Get(2).size == 1);
+}
+
+void TestHanoiInvalidMoveKeepsState() {
+    Stack<HanoiItem> rods[3];
+    rods[0].Push({2, ITEM_DISC, COLOR_RED});
+    rods[1].Push({1, ITEM_RING, COLOR_BLUE});
+
+    int moveCount = 0;
+    ExpectThrows<EmptyStructure>([&rods, &moveCount]() {
+        MoveHanoiItem(rods, 0, 1, moveCount, 2);
+    });
+
+    assert(moveCount == 0);
+    assert(rods[0].GetSize() == 1);
+    assert(rods[0].Top().size == 2);
+    assert(rods[1].GetSize() == 1);
+    assert(rods[1].Top().size == 1);
 }
 
 void RunAllTests() {
     TestDynamicArray();
     TestDynamicArrayExceptions();
     TestLinkedList();
+    TestLinkedListNewOperations();
     TestArraySequence();
     TestMutableListSequence();
     TestArraySequenceFrom();
@@ -512,11 +789,19 @@ void RunAllTests() {
     TestStackBasic();
     TestStackAlgorithms();
     TestStackConcatAndSearch();
+    TestStackSubsequenceSearchExamples();
     TestStackExceptions();
     TestDequeBasic();
     TestDequeAlgorithms();
     TestDequeSort();
+    TestDequeSetAndComparison();
     TestDequeExceptions();
     TestPriorityQueueBasic();
+    TestPriorityQueueComparisonAndExceptions();
+    TestHanoiLabels();
+    TestHanoiInvalidIntegerInput();
+    TestHanoiGeneratedItems();
+    TestHanoiSolveThreeItems();
+    TestHanoiInvalidMoveKeepsState();
     std::cout << "All tests passed!\n";
 }
